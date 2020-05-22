@@ -3,7 +3,7 @@ if(window.require){
     require("../assistant");
 }
 
-describe("Personnel Administration - Employee Information - ListAssistedTables where PRP_PROCESS_REQUIRED is 0 smoke (Suite)", function() {
+describe("Personnel Administration - Employee Information - _fillAssistantOpt where PRP_PROCESS_REQUIRED is 0 smoke (Suite)", function() {
 
     var mock_dataGetItemsValues = null;
     var mock_nodeAssistant = null;

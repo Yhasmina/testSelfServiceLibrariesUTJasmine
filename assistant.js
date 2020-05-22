@@ -329,6 +329,62 @@ meta4.pa.employeeInformation.Assistant = function () {
     }
 
     /**
+     * Carga la lista de tablas modificables y sus nombres. Solo se hace una vez y la primera tabla que entra carga todas
+     */
+    function _loadListAssistedTablesOld() {
+        var _paintRequired = false;
+        var idTabsRequired = [];
+        if (_utils.nodeAssistant.count() > 0) {
+            var _dataEmployeeInfo = meta4.data.utils.getItemsValues(_utils.nodeEmployeeInfo, ['PRP_MISSING_REQUIRED_PROCESSES']);
+            if (_dataEmployeeInfo.PRP_MISSING_REQUIRED_PROCESSES === 1) {
+                _missingRequiredProcess = true;
+            } else {
+                _missingRequiredProcess = false;
+            }
+
+            for (var i = 0; i < _utils.nodeAssistant.count(); i++) {
+                _paintRequired = false;
+                _utils.nodeAssistant.moveTo(i);
+                var data = meta4.data.utils.getItemsValues(_utils.nodeAssistant, ['PLCO_ID_TAB', 'PLCO_ID_TABLE', 'PLCO_NM_TABLE', 'PRP_PROCESS_REQUIRED', 'PRP_PROCESS_COMPLETED']);
+                if (data.PLCO_ID_TAB) {
+                    // Si faltan procesos requeridos por completar evaluamos si el proceso es requerido y está o no completado para decidir si lo pintamos
+                    if (_missingRequiredProcess) {
+                        if (data.PRP_PROCESS_REQUIRED === 1) {
+                            _paintRequired = true;
+                            idTabsRequired.include(data.PLCO_ID_TAB);
+                        }
+                    }
+                    if (!_assistantOpt[data.PLCO_ID_TAB]) {
+                        _assistantOpt[data.PLCO_ID_TAB] = {};
+                    }
+                    _assistantOpt[data.PLCO_ID_TAB].active = true;                  
+                    // Si tenemos que pintar el requerido o no hay procesos requeridos se trata la modificación
+                    if (_paintRequired || !_missingRequiredProcess) {
+                        if ((!_assistantOpt[data.PLCO_ID_TAB].listTables) || (_assistantOpt[data.PLCO_ID_TAB].listTables[data.PLCO_ID_TABLE])) {
+                            _assistantOpt[data.PLCO_ID_TAB].listTables = {};
+                        }
+                        if (!_assistantOpt[data.PLCO_ID_TAB].listTables[data.PLCO_ID_TABLE]) {
+                            _assistantOpt[data.PLCO_ID_TAB].listTables[data.PLCO_ID_TABLE] = {};
+                        }
+                        _assistantOpt[data.PLCO_ID_TAB].listTables[data.PLCO_ID_TABLE].nameTable = data.PLCO_NM_TABLE;
+                    } else if (!_paintRequired && _assistantOpt[data.PLCO_ID_TAB] && _assistantOpt[data.PLCO_ID_TAB].listTables && _assistantOpt[data.PLCO_ID_TAB].listTables[data.PLCO_ID_TABLE]) {
+                        delete _assistantOpt[data.PLCO_ID_TAB].listTables[data.PLCO_ID_TABLE];
+                        if (Object.keys(_assistantOpt[data.PLCO_ID_TAB].listTables).length === 0) {
+                            delete _assistantOpt[data.PLCO_ID_TAB].listTables;
+                            _assistantOpt[data.PLCO_ID_TAB].active = false;
+                            var btnAssistant = _utils.listBtnAssistant[_utils.btnAssistantID + data.PLCO_ID_TAB];
+                            if (btnAssistant) {
+                                btnAssistant.hide();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        _getTransProcessRequired(idTabsRequired)
+    }
+
+    /**
      * Rellena la propiedad AssistantOpt con las tablas y sus nombres.
      */
     function _fillAssistantOpt() {
@@ -1580,10 +1636,6 @@ meta4.pa.employeeInformation.Assistant = function () {
 
     function _setNodeAssistant(node) {
         _utils.nodeAssistant = node;
-    }
-
-    function _getNodeAssistant() {
-        return _utils.nodeAssistant;
     }
 
     function _setM4ObjectEmployeeInfo(m4object){

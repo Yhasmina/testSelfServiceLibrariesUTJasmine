@@ -3,7 +3,7 @@ if(window.require){
     require("../assistant");
 }
 
-describe("Personnel Administration - Employee Information - ListAssistedTables where PRP_PROCESS_REQUIRED is 1 smoke (Suite)", function() {
+describe("Personnel Administration - Employee Information - _fillAssistantOpt where PRP_PROCESS_REQUIRED is 1 smoke (Suite)", function() {
 
     var mock_nodeAssistant = null;
     var mock_utils = null;
@@ -56,7 +56,7 @@ describe("Personnel Administration - Employee Information - ListAssistedTables w
         expect(fillAssistantOpt).not.toThrow();
     });
 
-    it('should not call to getItemsValues', function() {
+    it('should not call to getItemsValues when nodeAssistant has not a register', function() {
 
         mock_nodeAssistant = jasmine.createSpyObj('mock_nodeAssistant', {
             'count': 0
@@ -74,7 +74,7 @@ describe("Personnel Administration - Employee Information - ListAssistedTables w
         expect(meta4.data.utils.getItemsValues).toHaveBeenCalledTimes(0);
     });
 
-    it('should call to getItemsValues two times', function() {
+    it('should call to getItemsValues two times when the nodeAssistant has a register', function() {
         meta4.pa.employeeInformation.Assistant.__test__only__._fillAssistantOpt();
 
         expect(meta4.data.utils.getItemsValues).toHaveBeenCalledTimes(2);
@@ -116,5 +116,6 @@ describe("Personnel Administration - Employee Information - ListAssistedTables w
 
         expect(options).toBeTruthy();
         expect(options.Personal.listTables).toEqual(jasmine.objectContaining({idTable:{nameTable:'nameTable1'}}));
+
     });
 });
